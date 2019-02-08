@@ -1,52 +1,20 @@
-package io.scalac.slack.example
+import slack.rtm.SlackRtmClient
+import akka.actor.ActorSystem
 
-import io.scalac.slack.MessageEventBus
-import io.scalac.slack.bots.AbstractBot
-import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
-import com.redis._
-import scala.math.pow
+implicit val system = ActorSystem("slack")
+implicit val ec = system.dispatcher
 
-class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
 
-  // Connects to a locally run redis instance on default port
-  val rClient = new RedisClient("localhost", 6379)
+val token = "<Your Token Here>"
+val client = SlackRtmClient(token)
 
-  // TODO
-  def getUserRating(user: String): String = "TODO"
+val selfId = client.state.self.id
 
-  // Expected probability that player A beats player B
-  def expProbAbeatsB(RatingA: String, RatingB: String): Double = {
-    // get rating difference
-    val rating_diff = RatingA.toDouble - RatingB.toDouble
-    val denominator = 1 + pow(10, rating_diff / 400.0)
-    pow(denominator, -1)
-  }
+client.onMessage { message =>
+  val mentionedIds = SlackUtil.extractMentionedIds(message.text)
 
-  // TODO update this
-  override def help(channel: String): OutboundMessage =
-    OutboundMessage(channel,
-      s"$name will help you to solve difficult math problems \\n" +
-      "Usage: $calc {operation} {arguments separated by space}")
-
-  val possibleOperations = Map(
-    "+" -> ((x: Double, y: Double) => x+y),
-    "-" -> ((x: Double, y: Double) => x-y),
-    "*" -> ((x: Double, y: Double) => x*y),
-    "/" -> ((x: Double, y: Double) => x/y)
-  )
-
-  override def act: Receive = {
-    case Command("calc", operation :: args, message) if args.length >= 1 =>
-      val op = possibleOperations.get(operation)
-
-      val response = op.map(f => {
-        val result = args.map(_.toDouble).reduceLeft( f(_,_) )
-        OutboundMessage(message.channel, s"Results is: $result")
-      }).getOrElse(OutboundMessage(message.channel, s"No operation $operation"))
-
-      publish(response)
-
-    case Command("calc", _, message) =>
-      publish(OutboundMessage(message.channel, s"No arguments specified!"))
+  if(mentionedIds.contains(selfId)) {
+    client.sendMessage(message.channel, s"<@${message.user}>: Hey!")
   }
 }
+
