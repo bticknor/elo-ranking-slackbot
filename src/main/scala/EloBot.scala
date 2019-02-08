@@ -2,21 +2,23 @@ import slack.rtm.SlackRtmClient
 import akka.actor.ActorSystem
 
 
-object Implicits {
+object PingPongBot extends App {
+
   implicit val system = ActorSystem("slack")
   implicit val ec = system.dispatcher
-}
 
-val token = "<Your Token Here>"
-val client = SlackRtmClient(token)
 
-val selfId = client.state.self.id
+  val token = "<Your Token Here>"
+  val client = SlackRtmClient(token)
 
-client.onMessage { message =>
+  val selfId = client.state.self.id
+
+  client.onMessage { message =>
   val mentionedIds = SlackUtil.extractMentionedIds(message.text)
 
-  if(mentionedIds.contains(selfId)) {
-    client.sendMessage(message.channel, s"<@${message.user}>: Hey!")
+	if(mentionedIds.contains(selfId)) {
+	  client.sendMessage(message.channel, s"<@${message.user}>: Hey!")
+	}
   }
 }
 
