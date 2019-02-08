@@ -3,8 +3,12 @@ package io.scalac.slack.example
 import io.scalac.slack.MessageEventBus
 import io.scalac.slack.bots.AbstractBot
 import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
+import com.redis._
 
 class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
+
+  // Connects to a locally run redis instance on default port
+  val rClient = new RedisClient("localhost", 6379)
 
   // TODO
   def getUserData(user: String): String = "TODO"
