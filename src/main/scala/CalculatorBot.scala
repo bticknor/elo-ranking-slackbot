@@ -11,9 +11,9 @@ class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
   val rClient = new RedisClient("localhost", 6379)
 
   // TODO
-  def getUserData(user: String): String = "TODO"
-  // TODO
   def getUserRating(user: String): String = "TODO"
+  // TODO
+  def probAbeatsB(userA: String, UserB: String): String = "TODO"
 
   // TODO update this
   override def help(channel: String): OutboundMessage =
