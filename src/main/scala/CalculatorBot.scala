@@ -4,8 +4,14 @@ import io.scalac.slack.MessageEventBus
 import io.scalac.slack.bots.AbstractBot
 import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
 
-class CalculatorBot(override val bus: MessageEventBus) extends AbstractBot {
+class PingPongBot(override val bus: MessageEventBus) extends AbstractBot {
 
+  // TODO
+  def getUserData(user: String): String = "TODO"
+  // TODO
+  def getUserRating(user: String): String = "TODO"
+
+  // TODO update this
   override def help(channel: String): OutboundMessage =
     OutboundMessage(channel,
       s"$name will help you to solve difficult math problems \\n" +
