@@ -4,6 +4,7 @@ import io.scalac.slack.MessageEventBus
 import io.scalac.slack.bots.AbstractBot
 import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
 import com.redis._
+import scala.math.pow
 
 class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
 
@@ -12,8 +13,14 @@ class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
 
   // TODO
   def getUserRating(user: String): String = "TODO"
-  // TODO
-  def probAbeatsB(userA: String, UserB: String): String = "TODO"
+
+  // Expected probability that player A beats player B
+  def expProbAbeatsB(RatingA: String, RatingB: String): Double = {
+    // get rating difference
+    val rating_diff = RatingA.toDouble - RatingB.toDouble
+    val denominator = 1 + pow(10, rating_diff / 400.0)
+    pow(denominator, -1)
+  }
 
   // TODO update this
   override def help(channel: String): OutboundMessage =
