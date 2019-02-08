@@ -18,7 +18,7 @@ object PingPongBot extends App {
   val mentionedIds = SlackUtil.extractMentionedIds(message.text)
 
 	if(mentionedIds.contains(selfId)) {
-	  client.sendMessage(message.channel, s"<@${message.user}>: Hey!")
+	  client.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
 	}
   }
 }
