@@ -1,9 +1,11 @@
 import slack.rtm.SlackRtmClient
 import akka.actor.ActorSystem
 
-implicit val system = ActorSystem("slack")
-implicit val ec = system.dispatcher
 
+object Implicits {
+  implicit val system = ActorSystem("slack")
+  implicit val ec = system.dispatcher
+}
 
 val token = "<Your Token Here>"
 val client = SlackRtmClient(token)
