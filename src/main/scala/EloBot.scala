@@ -1,5 +1,6 @@
 import slack.rtm.SlackRtmClient
 import akka.actor.ActorSystem
+import slack.SlackUtil
 
 
 object PingPongBot extends App {
