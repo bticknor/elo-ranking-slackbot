@@ -4,7 +4,7 @@ import io.scalac.slack.MessageEventBus
 import io.scalac.slack.bots.AbstractBot
 import io.scalac.slack.common.{BaseMessage, Command, OutboundMessage}
 
-class PingPongBot(override val bus: MessageEventBus) extends AbstractBot {
+class RandyDaytona(override val bus: MessageEventBus) extends AbstractBot {
 
   // TODO
   def getUserData(user: String): String = "TODO"
