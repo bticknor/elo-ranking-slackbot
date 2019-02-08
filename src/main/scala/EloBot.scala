@@ -9,7 +9,7 @@ object PingPongBot extends App {
   implicit val ec = system.dispatcher
 
 
-  val token = "xoxp-78086072006-78121176342-546690664693-2a53ec8bf21066395d730701bc78d5f0"
+  val token = "xoxb-151175863378-ckhDjYJDrGDM3Wpu40ijKwLp"
   val client = SlackRtmClient(token)
 
   val selfId = client.state.self.id
