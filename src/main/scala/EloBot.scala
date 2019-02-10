@@ -10,8 +10,8 @@ object PingPongBot extends App {
   implicit val system = ActorSystem("slack")
   implicit val ec = system.dispatcher
 
-  // Connection token
-  val token = "xoxb-151175863378-ckhDjYJDrGDM3Wpu40ijKwLp"
+  // Connection token - TODO catch exception
+  val token = sys.env("SLACK_TOKEN")
   
   // Connection to local redis server
   val redisClient = new RedisClient("localhost", 6379)
