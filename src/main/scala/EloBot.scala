@@ -10,6 +10,9 @@ object PingPongBot extends App {
   implicit val system = ActorSystem("slack")
   implicit val ec = system.dispatcher
 
+  // =========================================
+  // Internal state of the bot
+
   // Connection token - TODO catch exception
   val token = sys.env("SLACK_TOKEN")
   
@@ -22,11 +25,31 @@ object PingPongBot extends App {
   // ID of bot
   val selfId = slackClient.state.self.id
 
-  // Action to take 
+  // =========================================
+
+  // Help message
+  val helpMessage = """
+  Hi there! TODO
+  """
+
+  // Fetches a user's Elo performance score
+  def getUserScore(user: String): Double = {
+    val res = redisClient.get(user)
+    res match {
+      case Some(score) => score.toDouble
+      case None => 0.0
+    }
+  }
+
+  // Main entry point for message logic
   def onMessageAction(message: Message): Unit = {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
     if(mentionedIds.contains(selfId)) {
-      slackClient.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
+      val score = getUserScore(message.user)
+
+      // slackClient.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
+      // redisClient.set(message.user, "69")
+      slackClient.sendMessage(message.channel, s"<${score}>: this yo sco!")
     }
   }
 
