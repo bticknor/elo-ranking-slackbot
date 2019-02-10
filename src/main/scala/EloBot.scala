@@ -16,13 +16,13 @@ object PingPongBot extends App {
   // RTM connection to Slack
   val slackClient = SlackRtmClient(token)
 
-  val selfId = client.state.self.id
+  val selfId = slackClient.state.self.id
 
-  client.onMessage { message =>
+  slackClient.onMessage { message =>
   val mentionedIds = SlackUtil.extractMentionedIds(message.text)
 
 	if(mentionedIds.contains(selfId)) {
-	  client.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
+	  slackClient.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
 	}
   }
 }
