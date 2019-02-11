@@ -7,3 +7,4 @@ What are initial performance ratings set as?
   - Hardcoded?
 
 
+Logging!
