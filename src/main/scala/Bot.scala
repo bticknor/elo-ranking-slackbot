@@ -54,8 +54,14 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(message: Message): String = {
+  def challengeMessage(challenger: String, othersMentioned: Seq[String]): String = {
     // TODO!
+    // pattern match when othersMentioned is an empty seq
+    val challengee = othersMentioned match {
+      case Seq() => "nobody"
+      case _ => othersMentioned.head
+    }
+    // TODO get scores, compute probability
     "challenge"
   }
 
@@ -72,15 +78,33 @@ object PingPongBot extends App {
   // Main entry point for message logic
   def onMessageAction(message: Message): Unit = {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
-    // Check if the bot is mentioned
+    // check if the bot is mentioned
     if(mentionedIds.contains(selfId)) {
-      
-      // Print help message
+
+      // print help message if prompted
       if(message.text.contains("elp")) {
         slackClient.sendMessage(message.channel, helpMessage)
       }
 
+      // print leaderboard if prompted
+      if(message.text.contains("eaderboard")) {
+        val leaderboard = fetchLeaderboard
+        slackClient.sendMessage(message.channel, leaderboard)
+      }
 
+      // get ID of first other user mentioned
+      // TODO this will throw an exception if the Seq[String] is empty
+      val othersMentioned = mentionedIds.filter(
+        Id => Id != selfId
+      )
+
+      // if its a challenge, send a challenge message
+      if(message.text.contains("hallenge")) {
+        val chalMessage = challengeMessage(message.user, othersMentioned)
+        slackClient.sendMessage(message.channel, chalMessage)
+      }
+
+      // TODO: report
       // val score = getUserScore(message.user)
       
       // redisClient.set(message.user, "69")
