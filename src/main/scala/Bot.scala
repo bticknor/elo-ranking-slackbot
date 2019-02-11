@@ -33,15 +33,15 @@ object PingPongBot extends App {
 
   Commands I support:
 
-  "Help" - print this message
+  "help" - print this message
 
-  "Challenge" - notify another user that you'd like to throw down, and compute
+  "challenge" - notify another user that you'd like to throw down, and compute
   the probability that you will beat them...you must @ them in the message
 
-  "Report" - report a score...you can only report losing scores, and must @
+  "report" - report a score...you can only report losing scores, and must @
   the person you lost to in the message
 
-  "Leaderboard" - print the top 5 users in terms of Elo performance rating
+  "leaderboard" - print the top 5 users in terms of Elo performance rating
   """
 
   // Fetches a user's Elo performance score
@@ -58,10 +58,14 @@ object PingPongBot extends App {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
     // If the bot is mentioned
     if(mentionedIds.contains(selfId)) {
-      val score = getUserScore(message.user)
-
+      
+      if(message.text.contains("elp")) {
+        slackClient.sendMessage(message.channel, helpMessage)
+      }
+      // val score = getUserScore(message.user)
+      
       // redisClient.set(message.user, "69")
-      slackClient.sendMessage(message.channel, s"<${score}>: this yo sco!")
+      // slackClient.sendMessage(message.channel, s"<${score}>: this yo sco!")
     }
   }
 
