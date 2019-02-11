@@ -3,7 +3,7 @@ import slack.models.Message
 import akka.actor.ActorSystem
 import slack.SlackUtil
 import com.redis._
-
+import elo._
 
 object PingPongBot extends App {
 
@@ -15,7 +15,7 @@ object PingPongBot extends App {
 
   // Connection token - TODO catch exception
   val token = sys.env("SLACK_TOKEN")
-  
+
   // Connection to local redis server
   val redisClient = new RedisClient("localhost", 6379)
 
@@ -55,4 +55,3 @@ object PingPongBot extends App {
 
   slackClient.onMessage(onMessageAction)
 }
-

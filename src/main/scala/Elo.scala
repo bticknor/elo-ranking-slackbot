@@ -1,3 +1,5 @@
+package elo
+
 import scala.math.pow
 
 // Namespace for Elo ranking logic
