@@ -53,15 +53,34 @@ object PingPongBot extends App {
     }
   }
 
+  // Build challenge message
+  def challengeMessage(message: Message): String = {
+    // TODO!
+    "challenge"
+  }
+
+  def fetchLeaderboard(): String = {
+    // TODO!
+    "leaderboard"
+  }
+
+  def reportScore(message: Message): String = {
+    // TODO!
+    "score reported"
+  }
+
   // Main entry point for message logic
   def onMessageAction(message: Message): Unit = {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
-    // If the bot is mentioned
+    // Check if the bot is mentioned
     if(mentionedIds.contains(selfId)) {
       
+      // Print help message
       if(message.text.contains("elp")) {
         slackClient.sendMessage(message.channel, helpMessage)
       }
+
+
       // val score = getUserScore(message.user)
       
       // redisClient.set(message.user, "69")
