@@ -29,7 +29,19 @@ object PingPongBot extends App {
 
   // Help message
   val helpMessage = """
-  Hi there! TODO
+  Hi there! I'm Randy Daytona, True Fit's very own ping pong ranking bot.
+
+  Commands I support:
+
+  "Help" - print this message
+
+  "Challenge" - notify another user that you'd like to throw down, and compute
+  the probability that you will beat them...you must @ them in the message
+
+  "Report" - report a score...you can only report losing scores, and must @
+  the person you lost to in the message
+
+  "Leaderboard" - print the top 5 users in terms of Elo performance rating
   """
 
   // Fetches a user's Elo performance score
@@ -44,10 +56,10 @@ object PingPongBot extends App {
   // Main entry point for message logic
   def onMessageAction(message: Message): Unit = {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
+    // If the bot is mentioned
     if(mentionedIds.contains(selfId)) {
       val score = getUserScore(message.user)
 
-      // slackClient.sendMessage(message.channel, s"<@${message.user}>: Sup dawg!")
       // redisClient.set(message.user, "69")
       slackClient.sendMessage(message.channel, s"<${score}>: this yo sco!")
     }
