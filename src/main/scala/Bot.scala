@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import slack.SlackUtil
 import com.redis._
 import elo._
+import scala.math.round
 
 object PingPongBot extends App {
 
@@ -49,20 +50,27 @@ object PingPongBot extends App {
     val res = redisClient.get(user)
     res match {
       case Some(score) => score.toDouble
-      case None => 0.0
+      case None => -100000.0
     }
   }
 
   // Build challenge message
   def challengeMessage(challenger: String, othersMentioned: Seq[String]): String = {
-    // TODO!
-    // pattern match when othersMentioned is an empty seq
     val challengee = othersMentioned match {
       case Seq() => "nobody"
       case _ => othersMentioned.head
     }
-    // TODO get scores, compute probability
-    "challenge"
+    if(challengee == "nobody") {
+      "Mention a user to challenge them!" 
+    } else {
+      val challengerRating = getUserScore(challenger)
+      val challengeeRating = getUserScore(challengee)
+      // TODO: handle case when either doesn't have a score
+      val probChallengerWins = EloRankingSystem.probAbeatsB(
+        challengerRating, challengeeRating
+      )
+      s"""<@${challenger}>: has a ${round(probChallengerWins).toString}% chance of beating <@${message.user}>!")"""
+    }
   }
 
   def fetchLeaderboard(): String = {
