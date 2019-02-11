@@ -69,7 +69,7 @@ object PingPongBot extends App {
       val probChallengerWins = EloRankingSystem.probAbeatsB(
         challengerRating, challengeeRating
       )
-      s"""<@${challenger}>: has a ${round(probChallengerWins).toString}% chance of beating <@${message.user}>!")"""
+      s"""<@${challenger}>: has a ${round(probChallengerWins).toString}% chance of beating <@${challengee}>!")"""
     }
   }
 
