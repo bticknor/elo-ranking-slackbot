@@ -117,12 +117,6 @@ object PingPongBot extends App {
         val chalMessage = challengeMessage(message.user, othersMentioned)
         slackClient.sendMessage(message.channel, chalMessage)
       }
-
-      // TODO: report
-      // val score = getUserScore(message.user)
-      
-      // redisClient.set(message.user, "69")
-      // slackClient.sendMessage(message.channel, s"<${score}>: this yo sco!")
     }
   }
 
