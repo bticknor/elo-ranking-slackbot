@@ -69,7 +69,13 @@ object PingPongBot extends App {
       val probChallengerWins = EloRankingSystem.probAbeatsB(
         challengerRating, challengeeRating
       )
-      s"""<@${challenger}> has a ${round(probChallengerWins).toString}% chance of beating <@${challengee}>!"""
+      s"""
+      The gauntlet has been thrown down! <@${challengee}> you have been put on notice!
+
+      <@${challenger}> currently has an Elo rating of ${challengerRating.toString}
+      <@${challengee}> currently has an Elo rating of ${challengeeRating.toString}
+      <@${challenger}> has a ${round(100 * probChallengerWins).toString}% chance of beating <@${challengee}>
+      """
     }
   }
 
