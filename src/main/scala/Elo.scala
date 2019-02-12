@@ -8,6 +8,9 @@ object EloRankingSystem {
   // k parameter
   val k = 32
 
+  // default initial score
+  val initialScore = 800.0
+
   // Prior probability that player A beats player B, given their ratings
   def probAbeatsB(A_rating: Double, B_rating: Double): Double = {
     val denom = 1 + pow(10, (B_rating - A_rating) / 400)

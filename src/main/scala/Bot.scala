@@ -50,7 +50,7 @@ object PingPongBot extends App {
     val res = redisClient.get(user)
     res match {
       case Some(score) => score.toDouble
-      case None => 800.0
+      case None => EloRankingSystem.initialScore
     }
   }
 
