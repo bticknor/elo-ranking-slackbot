@@ -76,8 +76,31 @@ object PingPongBot extends App {
   }
 
   def fetchLeaderboard(): String = {
-    // TODO!
-    "leaderboard"
+    // get all users, unpack from Option value returned
+    val allUsers = redisClient.keys() match {
+      case Some(userlist) => userlist
+      case _ => List()
+    }
+    if(allUsers.length == 0) {
+      "No scores yet!"
+    } else {
+      val usersUnpacked = allUsers.map(userid => userid.get)
+      // TODO: handle case where no users in DB
+      val allUserScores = usersUnpacked.map(
+        id => redisClient.get(id).get.toDouble
+      )
+      // zip together users and scores
+      val usersAndScores = usersUnpacked zip allUserScores
+      val sortedScoresDesc = usersAndScores.sortBy(_._2).reverse
+      // TODO finish
+      s"""
+      True Fit top 3 Ping Pongers:
+
+      1. <@${todo}> ${todoscore}
+      2. <@${todo}> ${todoscore}
+      3. <@${todo}> ${todoscore}
+      """
+    }
   }
 
   def reportLoss(reporter: String, opponent: String): String = {
