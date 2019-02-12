@@ -1,12 +1,15 @@
 package elo
 
-import scala.math.pow
+import scala.math.{pow, BigDecimal}
 
 // Namespace for Elo ranking logic
 object EloRankingSystem {
 
   // k parameter
   val k = 32
+
+  // default initial score
+  val initialScore = 800.0
 
   // Prior probability that player A beats player B, given their ratings
   def probAbeatsB(A_rating: Double, B_rating: Double): Double = {
@@ -18,6 +21,8 @@ object EloRankingSystem {
   // A_win is encoded as a 1 if A wins, 0 otherwise
   def ratingUpdateA(A_rating: Double, B_rating: Double, A_win: Int): Double = {
     val expected = probAbeatsB(A_rating, B_rating)
-    (A_win.toDouble - expected) * k
+    val update = (A_win.toDouble - expected) * k
+    // round to 2 decimal places, jeez this is gnarly
+    BigDecimal(update).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
   }
 }

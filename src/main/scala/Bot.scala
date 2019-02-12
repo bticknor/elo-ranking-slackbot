@@ -39,8 +39,7 @@ object PingPongBot extends App {
   "challenge" - notify another user that you'd like to throw down, and compute
   the probability that you will beat them...you must @ them in the message
 
-  "report" - report a score...you can only report losing scores, and must @
-  the person you lost to in the message
+  "report" - report a loss...you must @ the person you lost to in the message
 
   "leaderboard" - print the top 5 users in terms of Elo performance rating
   """
@@ -48,18 +47,15 @@ object PingPongBot extends App {
   // Fetches a user's Elo performance score
   def getUserScore(user: String): Double = {
     val res = redisClient.get(user)
+    // If a user doesn't have a score in the DB, assign them the default
     res match {
       case Some(score) => score.toDouble
-      case None => 800.0
+      case None => EloRankingSystem.initialScore
     }
   }
 
   // Build challenge message
-  def challengeMessage(challenger: String, othersMentioned: Seq[String]): String = {
-    val challengee = othersMentioned match {
-      case Seq() => "nobody"
-      case _ => othersMentioned.head
-    }
+  def challengeMessage(challenger: String, challengee: String): String = {
     if(challengee == "nobody") {
       "Mention a user to challenge them!" 
     } else {
@@ -84,9 +80,32 @@ object PingPongBot extends App {
     "leaderboard"
   }
 
-  def reportScore(message: Message): String = {
-    // TODO!
-    "score reported"
+  def reportLoss(reporter: String, opponent: String): String = {
+    // hit DB for the current scores
+    val reporterRating = getUserScore(reporter)
+    val opponentRating = getUserScore(opponent)
+    // compute rating updates
+    val reporterRatingUpdate = EloRankingSystem.ratingUpdateA(
+      reporterRating, opponentRating, 0
+    )
+    // update both players' ratings
+    val reporterUpdatedRating = reporterRating + reporterRatingUpdate
+    val opponentUpdatedRating = opponentRating - reporterRatingUpdate
+    // write new ratings to DB
+    val reporterScoreWritten = redisClient.set(reporter, reporterUpdatedRating.toString)
+    val opponentScoreWritten = redisClient.set(opponent, opponentUpdatedRating.toString)
+
+    val successMessage = s"""
+    <@${reporter}> has reported a loss to <@${opponent}>.  Get 'em next time!
+
+    <@${reporter}>'s Elo rating changed from ${reporterRating} to ${reporterUpdatedRating}.
+    <@${opponent}>'s Elo rating changed from ${opponentRating} to ${opponentUpdatedRating}.
+    """
+    // check that scores are written successfully
+    Seq(reporterScoreWritten, opponentScoreWritten) match {
+      case Seq(true, true) => successMessage
+      case _ => "Uh oh - issue updating user ratings in the DB!"
+    }
   }
 
   // Main entry point for message logic
@@ -111,14 +130,25 @@ object PingPongBot extends App {
       val othersMentioned = mentionedIds.filter(
         Id => Id != selfId
       )
+      // get ID of first other user mentioned
+      val challengee = othersMentioned match {
+        case Seq() => "nobody"
+        case _ => othersMentioned.head
+      }
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val chalMessage = challengeMessage(message.user, othersMentioned)
+        val chalMessage = challengeMessage(message.user, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
+      }
+
+      // if it's a report message, update scores
+      if(message.text.contains("eport")) {
+        val reportMessage = reportLoss(message.user, challengee)
+        slackClient.sendMessage(message.channel, reportMessage)
       }
     }
   }
-
+  // Listen in on Slack via RTM API
   slackClient.onMessage(onMessageAction)
 }
