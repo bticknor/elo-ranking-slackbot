@@ -146,6 +146,6 @@ object PingPongBot extends App {
       }
     }
   }
-
+  // Listen in on Slack via RTM API
   slackClient.onMessage(onMessageAction)
 }
