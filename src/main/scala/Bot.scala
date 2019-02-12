@@ -136,13 +136,16 @@ object PingPongBot extends App {
         case _ => othersMentioned.head
       }
 
-
-
-
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
         val chalMessage = challengeMessage(message.user, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
+      }
+
+      // if it's a report message, update scores
+      if(message.text.contains("eport")) {
+        val reportMessage = reportLoss(message.user, challengee)
+        slackClient.sendMessage(message.channel, reportMessage)
       }
     }
   }
