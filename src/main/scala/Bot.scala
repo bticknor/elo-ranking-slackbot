@@ -50,7 +50,7 @@ object PingPongBot extends App {
     val res = redisClient.get(user)
     res match {
       case Some(score) => score.toDouble
-      case None => -100000.0
+      case None => 800.0
     }
   }
 
@@ -69,7 +69,7 @@ object PingPongBot extends App {
       val probChallengerWins = EloRankingSystem.probAbeatsB(
         challengerRating, challengeeRating
       )
-      s"""<@${challenger}>: has a ${round(probChallengerWins).toString}% chance of beating <@${challengee}>!")"""
+      s"""<@${challenger}> has a ${round(probChallengerWins).toString}% chance of beating <@${challengee}>!"""
     }
   }
 
