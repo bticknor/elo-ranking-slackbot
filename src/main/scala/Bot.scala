@@ -85,22 +85,27 @@ object PingPongBot extends App {
     val reporterRating = getUserScore(reporter)
     val opponentRating = getUserScore(opponent)
     // compute rating updates
-    val reporterRatingUpdate = ratingUpdateA(
+    val reporterRatingUpdate = EloRankingSystem.ratingUpdateA(
       reporterRating, opponentRating, 0
     )
     // update both players' ratings
     val reporterUpdatedRating = reporterRating + reporterRatingUpdate
     val opponentUpdatedRating = opponentRating - reporterRatingUpdate
     // write new ratings to DB
-    // TODO
-    // TODO
-    // TODO
-    s"""
+    val reporterScoreWritten = redisClient.set(reporter, reporterUpdatedRating.toString)
+    val opponentScoreWritten = redisClient.set(opponent, opponentUpdatedRating.toString)
+
+    val successMessage = s"""
     <@${reporter}> has reported a loss to <@${opponent}>.  Get 'em next time!
 
     <@${reporter}>'s Elo rating changed from ${reporterRating} to ${reporterUpdatedRating}.
     <@${opponent}>'s Elo rating changed from ${opponentRating} to ${opponentUpdatedRating}.
     """
+    // check that scores are written successfully
+    Seq(reporterScoreWritten, opponentScoreWritten) match {
+      case Seq(true, true) => successMessage
+      case _ => "Uh oh - issue updating user ratings in the DB!"
+    }
   }
 
   // Main entry point for message logic
