@@ -1,9 +1,11 @@
-import slack.rtm.SlackRtmClient
-import slack.models.Message
 import akka.actor.ActorSystem
-import slack.SlackUtil
-import com.redis._
+import com.redis.RedisClient
 import elo._
+import com.redis.serialization.Parse.Implicits.parseDouble
+import slack.SlackUtil
+import slack.models.Message
+import slack.rtm.SlackRtmClient
+
 import scala.math.round
 
 object PingPongBot extends App {
@@ -56,22 +58,20 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(challenger: String, challengee: String): String = {
-    if(challengee == "nobody") {
+  def challengeMessage(challenger: User, challengee: User): String = {
+    if(challengee == User.Nobody) {
       "Mention a user to challenge them!" 
     } else {
-      val challengerRating = getUserScore(challenger)
-      val challengeeRating = getUserScore(challengee)
-      // TODO: handle case when either doesn't have a score
+            // TODO: handle case when either doesn't have a score
       val probChallengerWins = EloRankingSystem.probAbeatsB(
-        challengerRating, challengeeRating
+        challenger.score, challengee.score
       )
       s"""
       The gauntlet has been thrown down! <@${challengee}> you have been put on notice!
 
-      <@${challenger}> currently has an Elo rating of ${challengerRating.toString}
-      <@${challengee}> currently has an Elo rating of ${challengeeRating.toString}
-      <@${challenger}> has a ${round(100 * probChallengerWins).toString}% chance of beating <@${challengee}>
+      <@$challenger> currently has an Elo rating of ${challenger.score}
+      <@$challengee> currently has an Elo rating of ${challengee.score}
+      <@$challenger> has a ${round(100 * probChallengerWins)}% chance of beating <@$challengee>
       """
     }
   }
@@ -162,7 +162,9 @@ object PingPongBot extends App {
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val chalMessage = challengeMessage(message.user, challengee)
+        val challengerUser = UserService.userService.constructUser(message.user)
+        val challengeeUser = UserService.userService.constructUser(challengee)
+        val chalMessage = challengeMessage(challengerUser, challengeeUser)
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
@@ -176,3 +178,5 @@ object PingPongBot extends App {
   // Listen in on Slack via RTM API
   slackClient.onMessage(onMessageAction)
 }
+
+
