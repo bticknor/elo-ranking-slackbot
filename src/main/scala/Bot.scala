@@ -1,4 +1,4 @@
-import akka.actor.ActorSystem
+  import akka.actor.ActorSystem
 import com.redis.RedisClient
 import elo._
 import com.redis.serialization.Parse.Implicits.parseDouble
@@ -150,27 +150,21 @@ object PingPongBot extends App {
       }
 
       // get ID of first other user mentioned
-      // TODO this will throw an exception if the Seq[String] is empty
-      val othersMentioned = mentionedIds.filter(
-        Id => Id != selfId
-      )
-      // get ID of first other user mentioned
-      val challengee = othersMentioned match {
-        case Seq() => "nobody"
-        case _ => othersMentioned.head
-      }
+      val challengeeUser = mentionedIds
+        .find(_ != selfId) // retrieves first element for which the find condition is true
+        .map(UserService.userService.constructUser)
+        .getOrElse(User.Nobody)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
         val challengerUser = UserService.userService.constructUser(message.user)
-        val challengeeUser = UserService.userService.constructUser(challengee)
         val chalMessage = challengeMessage(challengerUser, challengeeUser)
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
-        val reportMessage = reportLoss(message.user, challengee)
+        val reportMessage = reportLoss(message.user, challengeeUser.name)
         slackClient.sendMessage(message.channel, reportMessage)
       }
     }
