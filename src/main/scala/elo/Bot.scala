@@ -1,11 +1,8 @@
 package elo
 
-import akka.actor.ActorSystem
-import com.redis.RedisClient
 import com.redis.serialization.Parse.Implicits.parseDouble
 import slack.SlackUtil
 import slack.models.Message
-import slack.rtm.SlackRtmClient
 
 import scala.math.round
 
