@@ -92,13 +92,13 @@ object PingPongBot extends App {
       // zip together users and scores
       val usersAndScores = usersUnpacked zip allUserScores
       val sortedScoresDesc = usersAndScores.sortBy(_._2).reverse
-      // TODO finish
+      // TODO what about when fewer than 3
       s"""
       True Fit top 3 Ping Pongers:
 
-      1. <@${todo}> ${todoscore}
-      2. <@${todo}> ${todoscore}
-      3. <@${todo}> ${todoscore}
+      1. <@${sortedScoresDesc(0)._1}> ${sortedScoresDesc(0)._2}
+      2. <@${sortedScoresDesc(1)._1}> ${sortedScoresDesc(1)._2}
+      3. <@${sortedScoresDesc(2)._1}> ${sortedScoresDesc(2)._2}
       """
     }
   }
