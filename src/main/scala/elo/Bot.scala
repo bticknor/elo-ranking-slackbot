@@ -1,6 +1,7 @@
-  import akka.actor.ActorSystem
+package elo
+
+import akka.actor.ActorSystem
 import com.redis.RedisClient
-import elo._
 import com.redis.serialization.Parse.Implicits.parseDouble
 import slack.SlackUtil
 import slack.models.Message
@@ -9,27 +10,6 @@ import slack.rtm.SlackRtmClient
 import scala.math.round
 
 object PingPongBot extends App {
-
-  implicit val system = ActorSystem("slack")
-  implicit val ec = system.dispatcher
-
-  // =========================================
-  // Internal state of the bot
-
-  // Connection token - TODO catch exception
-  val token = sys.env("SLACK_TOKEN")
-
-  // Connection to local redis server
-  val redisPort = sys.env("SLACK_BOT_REDIS_PORT").toInt
-  val redisClient = new RedisClient("localhost", redisPort)
-
-  // RTM connection to Slack
-  val slackClient = SlackRtmClient(token)
-
-  // ID of bot
-  val selfId = slackClient.state.self.id
-
-  // =========================================
 
   // Help message
   val helpMessage = """
@@ -152,12 +132,12 @@ object PingPongBot extends App {
       // get ID of first other user mentioned
       val challengee = mentionedIds
         .find(_ != selfId) // retrieves first element for which the find condition is true
-        .map(PlayerService.playerService.constructPlayer)
+        .map(PlayerService.playerService.getPlayer)
         .getOrElse(Player.Nobody)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val challenger = PlayerService.playerService.constructPlayer(message.user)
+        val challenger = PlayerService.playerService.getPlayer(message.user)
         val chalMessage = challengeMessage(challenger, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
       }

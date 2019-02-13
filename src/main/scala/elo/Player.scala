@@ -1,3 +1,5 @@
+package elo
+
 case class Player(slackUserId: String, score: Double)
 
 object Player {

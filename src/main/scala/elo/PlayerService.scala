@@ -1,10 +1,10 @@
-import PingPongBot.redisClient
+package elo
+
 import com.redis.serialization.Parse.Implicits.parseDouble
-import elo.EloRankingSystem
 
 class PlayerService {
 
-  def constructPlayer(slackUserId: String): Player = {
+  def getPlayer(slackUserId: String): Player = {
     if (slackUserId.toLowerCase == "nobody") {
       Player.Nobody
     } else {
@@ -19,7 +19,7 @@ class PlayerService {
       .keys[String]()
       .getOrElse(Nil)
       .flatten // get rid of keys that are Nones
-      .map(constructPlayer) // build user objects for each key
+      .map(getPlayer) // build user objects for each key
   }
 }
 
