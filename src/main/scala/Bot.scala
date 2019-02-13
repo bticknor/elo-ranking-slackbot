@@ -18,7 +18,8 @@ object PingPongBot extends App {
   val token = sys.env("SLACK_TOKEN")
 
   // Connection to local redis server
-  val redisClient = new RedisClient("localhost", 6379)
+  val redisPort = sys.env("SLACK_BOT_REDIS_PORT").toInt
+  val redisClient = new RedisClient("localhost", redisPort)
 
   // RTM connection to Slack
   val slackClient = SlackRtmClient(token)
