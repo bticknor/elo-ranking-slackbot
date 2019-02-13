@@ -58,8 +58,8 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(challenger: User, challengee: User): String = {
-    if(challengee == User.Nobody) {
+  def challengeMessage(challenger: Player, challengee: Player): String = {
+    if(challengee == Player.Nobody) {
       "Mention a user to challenge them!" 
     } else {
             // TODO: handle case when either doesn't have a score
@@ -150,21 +150,21 @@ object PingPongBot extends App {
       }
 
       // get ID of first other user mentioned
-      val challengeeUser = mentionedIds
+      val challengee = mentionedIds
         .find(_ != selfId) // retrieves first element for which the find condition is true
-        .map(UserService.userService.constructUser)
-        .getOrElse(User.Nobody)
+        .map(PlayerService.playerService.constructPlayer)
+        .getOrElse(Player.Nobody)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val challengerUser = UserService.userService.constructUser(message.user)
-        val chalMessage = challengeMessage(challengerUser, challengeeUser)
+        val challenger = PlayerService.playerService.constructPlayer(message.user)
+        val chalMessage = challengeMessage(challenger, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
-        val reportMessage = reportLoss(message.user, challengeeUser.name)
+        val reportMessage = reportLoss(message.user, challengee.slackUserId)
         slackClient.sendMessage(message.channel, reportMessage)
       }
     }
