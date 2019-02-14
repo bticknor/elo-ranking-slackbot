@@ -1,33 +1,12 @@
-import slack.rtm.SlackRtmClient
-import slack.models.Message
-import akka.actor.ActorSystem
+package elo
+
+import com.redis.serialization.Parse.Implicits.parseDouble
 import slack.SlackUtil
-import com.redis._
-import elo._
+import slack.models.Message
+
 import scala.math.round
 
 object PingPongBot extends App {
-
-  implicit val system = ActorSystem("slack")
-  implicit val ec = system.dispatcher
-
-  // =========================================
-  // Internal state of the bot
-
-  // Connection token - TODO catch exception
-  val token = sys.env("SLACK_TOKEN")
-
-  // Connection to local redis server
-  val redisPort = sys.env("SLACK_BOT_REDIS_PORT").toInt
-  val redisClient = new RedisClient("localhost", redisPort)
-
-  // RTM connection to Slack
-  val slackClient = SlackRtmClient(token)
-
-  // ID of bot
-  val selfId = slackClient.state.self.id
-
-  // =========================================
 
   // Help message
   val helpMessage = """
@@ -56,22 +35,20 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(challenger: String, challengee: String): String = {
-    if(challengee == "nobody") {
+  def challengeMessage(challenger: Player, challengee: Player): String = {
+    if(challengee == Player.Nobody) {
       "Mention a user to challenge them!" 
     } else {
-      val challengerRating = getUserScore(challenger)
-      val challengeeRating = getUserScore(challengee)
-      // TODO: handle case when either doesn't have a score
+            // TODO: handle case when either doesn't have a score
       val probChallengerWins = EloRankingSystem.probAbeatsB(
-        challengerRating, challengeeRating
+        challenger.score, challengee.score
       )
       s"""
       The gauntlet has been thrown down! <@${challengee}> you have been put on notice!
 
-      <@${challenger}> currently has an Elo rating of ${challengerRating.toString}
-      <@${challengee}> currently has an Elo rating of ${challengeeRating.toString}
-      <@${challenger}> has a ${round(100 * probChallengerWins).toString}% chance of beating <@${challengee}>
+      <@$challenger> currently has an Elo rating of ${challenger.score}
+      <@$challengee> currently has an Elo rating of ${challengee.score}
+      <@$challenger> has a ${round(100 * probChallengerWins)}% chance of beating <@$challengee>
       """
     }
   }
@@ -150,25 +127,21 @@ object PingPongBot extends App {
       }
 
       // get ID of first other user mentioned
-      // TODO this will throw an exception if the Seq[String] is empty
-      val othersMentioned = mentionedIds.filter(
-        Id => Id != selfId
-      )
-      // get ID of first other user mentioned
-      val challengee = othersMentioned match {
-        case Seq() => "nobody"
-        case _ => othersMentioned.head
-      }
+      val challengee = mentionedIds
+        .find(_ != selfId) // retrieves first element for which the find condition is true
+        .map(PlayerService.playerService.getPlayer)
+        .getOrElse(Player.Nobody)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val chalMessage = challengeMessage(message.user, challengee)
+        val challenger = PlayerService.playerService.getPlayer(message.user)
+        val chalMessage = challengeMessage(challenger, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
-        val reportMessage = reportLoss(message.user, challengee)
+        val reportMessage = reportLoss(message.user, challengee.slackUserId)
         slackClient.sendMessage(message.channel, reportMessage)
       }
     }
@@ -176,3 +149,5 @@ object PingPongBot extends App {
   // Listen in on Slack via RTM API
   slackClient.onMessage(onMessageAction)
 }
+
+

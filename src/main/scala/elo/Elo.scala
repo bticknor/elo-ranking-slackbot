@@ -1,6 +1,6 @@
 package elo
 
-import scala.math.{pow, BigDecimal}
+import scala.math.{BigDecimal, pow}
 
 // Namespace for Elo ranking logic
 object EloRankingSystem {
