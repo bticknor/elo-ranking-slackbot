@@ -35,23 +35,22 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(challenger: Player, challengee: Player): String = {
-    if(challengee == Player.Nobody) {
-      "Mention a user to challenge them!" 
-    } else {
-            // TODO: handle case when either doesn't have a score
-      val probChallengerWins = EloRankingSystem.probAbeatsB(
-        challenger.score, challengee.score
-      )
-      s"""
-      The gauntlet has been thrown down! <@${challengee}> you have been put on notice!
+  def challengeMessage(challenger: Player, challengee: Option[Player]): String = {
+    challengee match {
+      case None => "Mention a user to challenge them!"
+      case Player(chalId, chalScore) => {
+        val probChallengerWins = EloRankingSystem.probAbeatsB(
+          challenger.score, chalScore
+        )
+        s"""
+        The gauntlet has been thrown down! <@${chalId}> you have been put on notice!
 
-      <@$challenger> currently has an Elo rating of ${challenger.score}
-      <@$challengee> currently has an Elo rating of ${challengee.score}
-      <@$challenger> has a ${round(100 * probChallengerWins)}% chance of beating <@$challengee>
-      """
+        <@${challenger.slackUserId}> currently has an Elo rating of ${challenger.score}
+        <@${chalId}> currently has an Elo rating of ${chalScore}
+        <@${challenger.slackUserId}> has a ${round(100 * probChallengerWins)}% chance of beating <@${chalId}>
+        """
+      }
     }
-  }
 
   def fetchLeaderboard(): String = {
     // get all users, unpack from Option value returned
@@ -81,7 +80,7 @@ object PingPongBot extends App {
     }
   }
 
-  def reportLoss(loser: Player, winner: Player): String = {
+  def reportLoss(loser: Option[Player], winner: Option[Player]): String = {
     // compute rating update
     val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
       loser.score, winner.score, 0
@@ -128,11 +127,11 @@ object PingPongBot extends App {
       val challengee = mentionedIds
         .find(_ != selfId) // retrieves first element for which the find condition is true
         .map(PlayerService.playerService.getPlayer)
-        .getOrElse(Player.Nobody)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        val challenger = PlayerService.playerService.getPlayer(message.user)
+        // this will never throw an exception since all messages have a user
+        val challenger = PlayerService.playerService.getPlayer(message.user).get
         val chalMessage = challengeMessage(challenger, challengee)
         slackClient.sendMessage(message.channel, chalMessage)
       }

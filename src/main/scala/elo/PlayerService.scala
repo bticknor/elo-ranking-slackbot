@@ -9,7 +9,8 @@ class PlayerService {
   def validPlayerID(id: String): Boolean = id.contains("UD")
 
   def getPlayer(slackUserId: String): Option[Player] = {
-    // check to see if it's a valid player id, if so get the score
+    // check to see if it's a valid player id
+    // if so get the score or default
     if(validPlayerID(slackUserId)) {
       val userScore = redisClient
         .get[Double](slackUserId)
