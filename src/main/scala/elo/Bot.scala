@@ -81,20 +81,18 @@ object PingPongBot extends App {
     }
   }
 
-  def reportLoss(reporter: String, opponent: String): String = {
-    // hit DB for the current scores
-    val reporterRating = getUserScore(reporter)
-    val opponentRating = getUserScore(opponent)
-    // compute rating updates
-    val reporterRatingUpdate = EloRankingSystem.ratingUpdateA(
-      reporterRating, opponentRating, 0
+  def reportLoss(loser: Player, winner: Player): String = {
+    // compute rating update
+    val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
+      loser.score, winner.score, 0
     )
     // update both players' ratings
-    val reporterUpdatedRating = reporterRating + reporterRatingUpdate
-    val opponentUpdatedRating = opponentRating - reporterRatingUpdate
+    val loserUpdatedRating = loser.score + loserRatingUpdate
+    // zero sum update, a property of Elo
+    val winnerUpdatedRating = winner.score - loserRatingUpdate
     // write new ratings to DB
-    val reporterScoreWritten = redisClient.set(reporter, reporterUpdatedRating.toString)
-    val opponentScoreWritten = redisClient.set(opponent, opponentUpdatedRating.toString)
+    val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating.toString)
+    val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating.toString)
 
     val successMessage = s"""
     <@${reporter}> has reported a loss to <@${opponent}>.  Get 'em next time!
