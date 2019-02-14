@@ -140,10 +140,12 @@ object PingPongBot extends App {
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
         // TODO the concept of a "nobody" user should be replaced with an Option of a user
-        val reportMessage = if(challengee == "nobody") {
+        val reportMessage = if(challengee == Player.Nobody) {
           "Mention a user to report a loss to them!"
         } else {
-          reportLoss(message.user, challengee)
+          reportLoss(
+            PlayerService.playerService.getPlayer(message.user), challengee
+          )
         }
         slackClient.sendMessage(message.channel, reportMessage)
       }
