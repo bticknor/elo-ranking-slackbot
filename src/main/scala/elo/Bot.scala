@@ -81,26 +81,24 @@ object PingPongBot extends App {
     }
   }
 
-  def reportLoss(reporter: String, opponent: String): String = {
-    // hit DB for the current scores
-    val reporterRating = getUserScore(reporter)
-    val opponentRating = getUserScore(opponent)
-    // compute rating updates
-    val reporterRatingUpdate = EloRankingSystem.ratingUpdateA(
-      reporterRating, opponentRating, 0
+  def reportLoss(loser: Player, winner: Player): String = {
+    // compute rating update
+    val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
+      loser.score, winner.score, 0
     )
     // update both players' ratings
-    val reporterUpdatedRating = reporterRating + reporterRatingUpdate
-    val opponentUpdatedRating = opponentRating - reporterRatingUpdate
+    val loserUpdatedRating = loser.score + loserRatingUpdate
+    // zero sum update, a property of Elo
+    val winnerUpdatedRating = winner.score - loserRatingUpdate
     // write new ratings to DB
-    val reporterScoreWritten = redisClient.set(reporter, reporterUpdatedRating.toString)
-    val opponentScoreWritten = redisClient.set(opponent, opponentUpdatedRating.toString)
+    val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating.toString)
+    val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating.toString)
 
     val successMessage = s"""
-    <@${reporter}> has reported a loss to <@${opponent}>.  Get 'em next time!
+    <@${loser.slackUserId}> has reported a loss to <@${winner.slackUserId}>.  Get 'em next time!
 
-    <@${reporter}>'s Elo rating changed from ${reporterRating} to ${reporterUpdatedRating}.
-    <@${opponent}>'s Elo rating changed from ${opponentRating} to ${opponentUpdatedRating}.
+    <@${loser.slackUserId}>'s Elo rating changed from ${loser.score} to ${loserUpdatedRating}.
+    <@${winner.slackUserId}>'s Elo rating changed from ${winner.score} to ${winnerUpdatedRating}.
     """
     // check that scores are written successfully
     Seq(reporterScoreWritten, opponentScoreWritten) match {
@@ -142,10 +140,12 @@ object PingPongBot extends App {
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
         // TODO the concept of a "nobody" user should be replaced with an Option of a user
-        val reportMessage = if(challengee == "nobody") {
+        val reportMessage = if(challengee == Player.Nobody) {
           "Mention a user to report a loss to them!"
         } else {
-          reportLoss(message.user, challengee)
+          reportLoss(
+            PlayerService.playerService.getPlayer(message.user), challengee
+          )
         }
         slackClient.sendMessage(message.channel, reportMessage)
       }
