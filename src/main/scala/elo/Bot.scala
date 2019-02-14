@@ -95,10 +95,10 @@ object PingPongBot extends App {
     val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating.toString)
 
     val successMessage = s"""
-    <@${reporter}> has reported a loss to <@${opponent}>.  Get 'em next time!
+    <@${loser.slackUserId}> has reported a loss to <@${winner.slackUserId}>.  Get 'em next time!
 
-    <@${reporter}>'s Elo rating changed from ${reporterRating} to ${reporterUpdatedRating}.
-    <@${opponent}>'s Elo rating changed from ${opponentRating} to ${opponentUpdatedRating}.
+    <@${loser.slackUserId}>'s Elo rating changed from ${loser.score} to ${loserUpdatedRating}.
+    <@${winner.slackUserId}>'s Elo rating changed from ${winner.score} to ${winnerUpdatedRating}.
     """
     // check that scores are written successfully
     Seq(reporterScoreWritten, opponentScoreWritten) match {
