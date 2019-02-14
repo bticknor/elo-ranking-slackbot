@@ -19,8 +19,9 @@ class PlayerService {
     } else {
       None
     }
+}
 
-  def findAllPlayers: Seq[Player] = {
+  def findAllPlayers: Seq[Option[Player]] = {
     redisClient
       .keys[String]()
       .getOrElse(Nil)

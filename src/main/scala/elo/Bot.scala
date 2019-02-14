@@ -35,22 +35,18 @@ object PingPongBot extends App {
   }
 
   // Build challenge message
-  def challengeMessage(challenger: Player, challengee: Option[Player]): String = {
-    challengee match {
-      case None => "Mention a user to challenge them!"
-      case Player(chalId, chalScore) => {
-        val probChallengerWins = EloRankingSystem.probAbeatsB(
-          challenger.score, chalScore
-        )
-        s"""
-        The gauntlet has been thrown down! <@${chalId}> you have been put on notice!
+  def challengeMessage(challenger: Player, challengee: Player): String = {
+    val probChallengerWins = EloRankingSystem.probAbeatsB(
+      challenger.score, challengee.score
+    )
+    s"""
+    The gauntlet has been thrown down! <@${challengee.slackUserId}> you have been put on notice!
 
-        <@${challenger.slackUserId}> currently has an Elo rating of ${challenger.score}
-        <@${chalId}> currently has an Elo rating of ${chalScore}
-        <@${challenger.slackUserId}> has a ${round(100 * probChallengerWins)}% chance of beating <@${chalId}>
-        """
-      }
-    }
+    <@${challenger.slackUserId}> currently has an Elo rating of ${challenger.score}
+    <@${challengee.slackUserId}> currently has an Elo rating of ${challengee.score}
+    <@${challenger.slackUserId}> has a ${round(100 * probChallengerWins)}% chance of beating <@${challengee.slackUserId}>
+    """
+  }
 
   def fetchLeaderboard(): String = {
     // get all users, unpack from Option value returned
@@ -80,7 +76,7 @@ object PingPongBot extends App {
     }
   }
 
-  def reportLoss(loser: Option[Player], winner: Option[Player]): String = {
+  def reportLoss(loser: Player, winner: Player): String = {
     // compute rating update
     val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
       loser.score, winner.score, 0
@@ -123,28 +119,30 @@ object PingPongBot extends App {
         slackClient.sendMessage(message.channel, leaderboard)
       }
 
-      // get ID of first other user mentioned
-      val challengee = mentionedIds
-        .find(_ != selfId) // retrieves first element for which the find condition is true
-        .map(PlayerService.playerService.getPlayer)
+      // this will never throw an exception since messages necessarily have a user
+      val challenger = PlayerService.playerService.getPlayer(message.user).get
+      // get first other player mentioned
+      val challengeeID = mentionedIds // seq[string]
+        .find(_ != selfId) // option[string]
+        .getOrElse("nobody")
+      val challengee = PlayerService.playerService.getPlayer(challengeeID)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
         // this will never throw an exception since all messages have a user
-        val challenger = PlayerService.playerService.getPlayer(message.user).get
-        val chalMessage = challengeMessage(challenger, challengee)
+        val chalMessage = challengee match {
+          case None => "Mention a user to challenge them!"
+          case Some(player) => challengeMessage(challenger, player)
+        }
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
         // TODO the concept of a "nobody" user should be replaced with an Option of a user
-        val reportMessage = if(challengee == Player.Nobody) {
-          "Mention a user to report a loss to them!"
-        } else {
-          reportLoss(
-            PlayerService.playerService.getPlayer(message.user), challengee
-          )
+        val reportMessage = challengee match {
+          case None => "Mention a user to report a loss to them!"
+          case Some(player) => reportLoss(challenger, player)
         }
         slackClient.sendMessage(message.channel, reportMessage)
       }
