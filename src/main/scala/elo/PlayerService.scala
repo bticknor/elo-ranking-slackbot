@@ -9,14 +9,15 @@ class PlayerService {
   def validPlayerID(id: String): Boolean = id.contains("UD")
 
   def getPlayer(slackUserId: String): Option[Player] = {
-    // fetch score or default
-    val userScore = redisClient.get[Double](slackUserId).getOrElse(EloRankingSystem.initialScore)
-    // Checks ID to see if it is valid, then returns player with score or default
-    validPlayerID(slackUserId) match {
-      case true => Some(Player(slackUserId, userScore))
-      case _ => None
+    // check to see if it's a valid player id, if so get the score
+    if(validPlayerID(slackUserId)) {
+      val userScore = redisClient
+        .get[Double](slackUserId)
+        .getOrElse(EloRankingSystem.initialScore)
+      Some(Player(slackUserId, userScore))
+    } else {
+      None
     }
-  }
 
   def findAllPlayers: Seq[Player] = {
     redisClient
