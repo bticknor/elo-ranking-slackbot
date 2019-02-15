@@ -4,22 +4,29 @@ import com.redis.serialization.Parse.Implicits.parseDouble
 
 class PlayerService {
 
-  def getPlayer(slackUserId: String): Player = {
-    if (slackUserId.toLowerCase == "nobody") {
-      Player.Nobody
+  // test of whether an ID mentioned is a valid player
+  // slack user IDs are prefixed with "UD"
+  def validPlayerID(id: String): Boolean = id.contains("UD")
+
+  def getPlayer(slackUserId: String): Option[Player] = {
+    // check to see if it's a valid player id
+    // if so get the score or default
+    if(validPlayerID(slackUserId)) {
+      val userScore = redisClient
+        .get[Double](slackUserId)
+        .getOrElse(EloRankingSystem.initialScore)
+      Some(Player(slackUserId, userScore))
     } else {
-      // If a user doesn't have a score in the DB, assign them the default
-      val userScore = redisClient.get[Double](slackUserId).getOrElse(EloRankingSystem.initialScore)
-      Player(slackUserId, userScore)
+      None
     }
-  }
+}
 
   def findAllPlayers: Seq[Player] = {
     redisClient
       .keys[String]()
       .getOrElse(Nil)
       .flatten // get rid of keys that are Nones
-      .map(getPlayer) // build user objects for each key
+      .flatMap(getPlayer) // build user objects for each key
   }
 }
 
