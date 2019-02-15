@@ -103,6 +103,7 @@ object PingPongBot extends App {
   }
 
   // Main entry point for message logic
+  // TODO clean this up
   def onMessageAction(message: Message): Unit = {
     val mentionedIds = SlackUtil.extractMentionedIds(message.text)
     // check if the bot is mentioned
@@ -120,29 +121,30 @@ object PingPongBot extends App {
       }
 
       // this will never throw an exception since messages necessarily have a user
-      val challenger = PlayerService.playerService.getPlayer(message.user).get
+      val challengerOpt = PlayerService.playerService.getPlayer(message.user)
+
       // get first other player mentioned
       val challengeeID = mentionedIds // seq[string]
         .find(_ != selfId) // option[string]
         .getOrElse("nobody")
-      val challengee = PlayerService.playerService.getPlayer(challengeeID)
+      val challengeeOpt = PlayerService.playerService.getPlayer(challengeeID)
 
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
-        // this will never throw an exception since all messages have a user
-        val chalMessage = challengee match {
-          case None => "Mention a user to challenge them!"
-          case Some(player) => challengeMessage(challenger, player)
+        // need valid identities for both players for a challenge
+        val chalMessage = (challengerOpt, challengeeOpt) match {
+          case (Some(challenger), Some(challengee)) => challengeMessage(challenger, challengee)
+          case _ => "Mention a user to challenge them!"
         }
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
-        // TODO the concept of a "nobody" user should be replaced with an Option of a user
-        val reportMessage = challengee match {
-          case None => "Mention a user to report a loss to them!"
-          case Some(player) => reportLoss(challenger, player)
+        // need valid identities for both players for a loss report
+        val reportMessage = (challengerOpt, challengeeOpt) match {
+          case (Some(challenger), Some(challengee)) => reportLoss(challenger, challengee)
+          case _ => "Mention a user to report a loss to them!"
         }
         slackClient.sendMessage(message.channel, reportMessage)
       }

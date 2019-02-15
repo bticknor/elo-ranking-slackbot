@@ -21,12 +21,12 @@ class PlayerService {
     }
 }
 
-  def findAllPlayers: Seq[Option[Player]] = {
+  def findAllPlayers: Seq[Player] = {
     redisClient
       .keys[String]()
       .getOrElse(Nil)
       .flatten // get rid of keys that are Nones
-      .map(getPlayer) // build user objects for each key
+      .flatMap(getPlayer) // build user objects for each key
   }
 }
 
