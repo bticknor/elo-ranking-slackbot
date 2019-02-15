@@ -132,20 +132,24 @@ object PingPongBot extends App {
       // if its a challenge, send a challenge message
       if(message.text.contains("hallenge")) {
         // need valid identities for both players for a challenge
-        val chalMessage = (challengerOpt, challengeeOpt) match {
-          case (Some(challenger), Some(challengee)) => challengeMessage(challenger, challengee)
-          case _ => "Mention a user to challenge them!"
-        }
+        val chalMessage = (for {
+          challenger <- challengerOpt
+          challengee <- challengeeOpt
+        } yield {
+          challengeMessage(challenger, challengee)
+        }).getOrElse("Mention a user to challenge them!")
         slackClient.sendMessage(message.channel, chalMessage)
       }
 
       // if it's a report message, update scores
       if(message.text.contains("eport")) {
         // need valid identities for both players for a loss report
-        val reportMessage = (challengerOpt, challengeeOpt) match {
-          case (Some(challenger), Some(challengee)) => reportLoss(challenger, challengee)
-          case _ => "Mention a user to report a loss to them!"
-        }
+        val reportMessage = (for {
+          challenger <- challengerOpt
+          challengee <- challengeeOpt
+        } yield {
+          reportLoss(challenger, challengee)
+        }).getOrElse("Mention a user to report a loss to them!")
         slackClient.sendMessage(message.channel, reportMessage)
       }
     }
