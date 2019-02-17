@@ -50,20 +50,17 @@ object PingPongBot extends App {
 
   def fetchLeaderboard(): String = {
     // get all users, unpack from Option value returned
-    val allUsers = redisClient.keys() match {
-      case Some(userlist) => userlist
-      case _ => List()
-    }
-    if(allUsers.length == 0) {
+    val allUsersOpt = redisClient.keys[String]().getOrElse(List())
+    if(allUsersOpt.length == 0) {
       "No scores yet!"
     } else {
-      val usersUnpacked = allUsers.map(userid => userid.get)
+      val users = allUsersOpt.flatten
       // TODO: handle case where no users in DB
-      val allUserScores = usersUnpacked.map(
+      val allUserScores = users.map(
         id => redisClient.get(id).get.toDouble
       )
       // zip together users and scores
-      val usersAndScores = usersUnpacked zip allUserScores
+      val usersAndScores = users zip allUserScores
       val sortedScoresDesc = usersAndScores.sortBy(_._2).reverse
       // TODO what about when fewer than 3
       s"""
@@ -157,5 +154,3 @@ object PingPongBot extends App {
   // Listen in on Slack via RTM API
   slackClient.onMessage(onMessageAction)
 }
-
-
