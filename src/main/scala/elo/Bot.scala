@@ -56,11 +56,13 @@ object PingPongBot extends App {
     } else {
       val users = allUsersOpt.flatten
       // TODO: handle case where no users in DB
-      val allUserScores = users.map(
-        id => redisClient.get(id).get.toDouble
-      )
+      val userScoresStr = users.map(
+        id => redisClient.get(id)
+      ).flatten
+      // cast scores to numerics
+      val userScores = userScoresStr.map(score => score.toDouble)
       // zip together users and scores
-      val usersAndScores = users zip allUserScores
+      val usersAndScores = users zip userScores
       val sortedScoresDesc = usersAndScores.sortBy(_._2).reverse
       // TODO what about when fewer than 3
       s"""
