@@ -42,8 +42,8 @@ object PingPongBot extends App {
     s"""
     The gauntlet has been thrown down! <@${challengee.slackUserId}> you have been put on notice!
 
-    <@${challenger.slackUserId}> currently has an Elo rating of ${challenger.score}
-    <@${challengee.slackUserId}> currently has an Elo rating of ${challengee.score}
+    <@${challenger.slackUserId}> currently has an Elo rating of ${formatScore(challenger.score)}
+    <@${challengee.slackUserId}> currently has an Elo rating of ${formatScore(challengee.score)}
     <@${challenger.slackUserId}> has a ${round(100 * probChallengerWins)}% chance of beating <@${challengee.slackUserId}>
     """
   }
@@ -68,9 +68,9 @@ object PingPongBot extends App {
       s"""
       True Fit top 3 Ping Pongers:
 
-      1. <@${sortedScoresDesc(0)._1}> ${sortedScoresDesc(0)._2}
-      2. <@${sortedScoresDesc(1)._1}> ${sortedScoresDesc(1)._2}
-      3. <@${sortedScoresDesc(2)._1}> ${sortedScoresDesc(2)._2}
+      1. <@${sortedScoresDesc(0)._1}> ${formatScore(sortedScoresDesc(0)._2)}
+      2. <@${sortedScoresDesc(1)._1}> ${formatScore(sortedScoresDesc(1)._2)}
+      3. <@${sortedScoresDesc(2)._1}> ${formatScore(sortedScoresDesc(2)._2)}
       """
     }
   }
@@ -81,18 +81,18 @@ object PingPongBot extends App {
       loser.score, winner.score, 0
     )
     // update both players' ratings
-    val loserUpdatedRating = loser.score + loserRatingUpdate
+    val loserUpdatedRating = formatScore(loser.score + loserRatingUpdate)
     // zero sum update, a property of Elo
-    val winnerUpdatedRating = winner.score - loserRatingUpdate
+    val winnerUpdatedRating = formatScore(winner.score - loserRatingUpdate)
     // write new ratings to DB
-    val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating.toString)
-    val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating.toString)
+    val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating)
+    val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating)
 
     val successMessage = s"""
     <@${loser.slackUserId}> has reported a loss to <@${winner.slackUserId}>.  Get 'em next time!
 
-    <@${loser.slackUserId}>'s Elo rating changed from ${loser.score} to ${loserUpdatedRating}.
-    <@${winner.slackUserId}>'s Elo rating changed from ${winner.score} to ${winnerUpdatedRating}.
+    <@${loser.slackUserId}>'s Elo rating changed from ${formatScore(loser.score)} to ${loserUpdatedRating}.
+    <@${winner.slackUserId}>'s Elo rating changed from ${formatScore(winner.score)} to ${winnerUpdatedRating}.
     """
     // check that scores are written successfully
     Seq(reporterScoreWritten, opponentScoreWritten) match {

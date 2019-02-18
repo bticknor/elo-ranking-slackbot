@@ -24,4 +24,10 @@ package object elo {
   val selfId = slackClient.state.self.id
 
   // =========================================
+  // Utility functions
+
+  // formats user score to be rounded to two decimal places
+  def formatScore(userScore: Double): String = f"$userScore%1.2f"
+
+  // =========================================
 }
