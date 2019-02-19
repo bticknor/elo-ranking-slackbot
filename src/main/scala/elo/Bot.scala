@@ -19,7 +19,8 @@ object PingPongBot extends App {
   "challenge" - notify another user that you'd like to throw down, and compute
   the probability that you will beat them...you must @ them in the message
 
-  "report" - report a loss...you must @ the person you lost to in the message
+  "congrats" - report a loss / congratulate the winner...you must @ the person you
+  lost to in the message
 
   "leaderboard" - print the top 5 users in terms of Elo performance rating
   """
@@ -141,7 +142,7 @@ object PingPongBot extends App {
       }
 
       // if it's a report message, update scores
-      if(message.text.contains("eport")) {
+      if(message.text.contains("ongrats")) {
         // need valid identities for both players for a loss report
         val reportMessage = (for {
           challenger <- challengerOpt
