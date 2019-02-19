@@ -8,13 +8,13 @@ The bot currently supports four commands:
 
 - "help" 
 - "challenge"
-- "report"
+- "congrats"
 - "leaderboard"
 
 The help command prints this usage message, which describes the other commands:
 
 ```
-Hi there! I'm {APP_NAME}, True Fit's very own ping pong ranking bot.
+Hi there! I'm {APP_NAME}, the ping pong ranking bot.
 
 Commands I support:
 
@@ -23,7 +23,7 @@ Commands I support:
 "challenge" - notify another user that you'd like to throw down, and compute
  the probability that you will beat them...you must @ them in the message
 
-"report" - report a loss...you must @ the person you lost to in the message
+"congrats" - report a loss / congratulate the winner...you must @ the person you lost to in the message
 
 "leaderboard" - print the top 5 users in terms of Elo performance rating
 ```
@@ -32,7 +32,7 @@ Commands I support:
 
 TODO finish section
 
-Installation of the bot installs registering a Slack app (https://api.slack.com/apps) for your workspace and retrieving a Bot User OAuth Access Token, which can be found in the `Oauth & Permissions` section on the website.
+Installation of the bot installs registering a Slack app (https://api.slack.com/apps) for your workspace and retrieving a Bot User OAuth Access Token, which can be found in `Oauth & Permissions`.
 
 Right now, deployment of the bot requires that you locally generate the "fat jar" file that includes the compiled bot code and bundled dependencies (this process requires Java and SBT):
 
@@ -42,13 +42,13 @@ Right now, deployment of the bot requires that you locally generate the "fat jar
 
 To run the bot, follow these steps:
 
-- Run a Redis server on port XXX:
+- Run a Redis server on port {PORT}:
 
-  ` redis-server -p XXX`
+  ` redis-server -p {PORT}`
 
 - Set the `SLACK_BOT_REDIS_PORT` environment variable to point at that server:
 
-  `export SLACK_BOT_REDIS_PORT=XXX`
+  `export SLACK_BOT_REDIS_PORT={PORT}`
 
 - Set the `SLACK_TOKEN` environment variable to the value of the bot OAuth token:
 
