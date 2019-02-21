@@ -22,7 +22,7 @@ object PingPongBot extends App {
   "congrats" - report a loss / congratulate the winner...you must @ the person you
   lost to in the message
 
-  "leaderboard" - print the top 5 users in terms of Elo performance rating
+  "leaderboard" - print the top 3 users in terms of Elo performance rating
   """
 
   // Fetches a user's Elo performance score
