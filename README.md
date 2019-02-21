@@ -30,8 +30,6 @@ Commands I support:
 
 ## Installation / Deployment
 
-TODO finish section
-
 Installation of the bot installs registering a Slack app (https://api.slack.com/apps) for your workspace and retrieving a Bot User OAuth Access Token, which can be found in `Oauth & Permissions`.
 
 Right now, deployment of the bot requires that you locally generate the "fat jar" file that includes the compiled bot code and bundled dependencies (this process requires Java and SBT):
