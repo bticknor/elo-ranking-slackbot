@@ -6,9 +6,9 @@ class PlayerService {
 
   // test of whether an ID mentioned is a valid player
   // slack user IDs are prefixed with "UD"
-  def validPlayerID(id: String): Boolean = id.contains("UD")
+  def validPlayerID(id: SlackUserId): Boolean = id.contains("UD")
 
-  def getPlayer(slackUserId: String): Option[Player] = {
+  def getPlayer(slackUserId: SlackUserId): Option[Player] = {
     // check to see if it's a valid player id
     // if so get the score or default
     if(validPlayerID(slackUserId)) {

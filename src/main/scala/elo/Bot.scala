@@ -50,30 +50,8 @@ object PingPongBot extends App {
   }
 
   def fetchLeaderboard(): String = {
-    // get all users, unpack from Option value returned
-    val allUsersOpt = redisClient.keys[String]().getOrElse(List())
-    if(allUsersOpt.length == 0) {
-      "No scores yet!"
-    } else {
-      val users = allUsersOpt.flatten
-      // TODO: handle case where no users in DB
-      val userScoresStr = users.map(
-        id => redisClient.get(id)
-      ).flatten
-      // cast scores to numerics
-      val userScores = userScoresStr.map(score => score.toDouble)
-      // zip together users and scores
-      val usersAndScores = users zip userScores
-      val sortedScoresDesc = usersAndScores.sortBy(_._2).reverse
-      // TODO what about when fewer than 3
-      s"""
-      True Fit top 3 Ping Pongers:
-
-      1. <@${sortedScoresDesc(0)._1}> ${formatScore(sortedScoresDesc(0)._2)}
-      2. <@${sortedScoresDesc(1)._1}> ${formatScore(sortedScoresDesc(1)._2)}
-      3. <@${sortedScoresDesc(2)._1}> ${formatScore(sortedScoresDesc(2)._2)}
-      """
-    }
+    val topPlayers = LeaderboardService.leaderboardService.getLeaderboard()
+    LeaderboardService.leaderboardService.formatLeaderboard(topPlayers)
   }
 
   def reportLoss(loser: Player, winner: Player): String = {

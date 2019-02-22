@@ -27,7 +27,11 @@ package object elo {
   // Utility functions
 
   // formats user score to be rounded to two decimal places
+  @deprecated(message = "use Player.formattedScore")
   def formatScore(userScore: Double): String = f"$userScore%1.2f"
 
   // =========================================
+  // Type aliases for readability
+
+  type SlackUserId = String
 }
