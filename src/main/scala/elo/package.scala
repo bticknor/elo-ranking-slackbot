@@ -31,7 +31,11 @@ package object elo {
   def formatScore(userScore: Double): String = f"$userScore%1.2f"
 
   // =========================================
-  // Type aliases for readability
+  // Type ALL the things!
 
-  type SlackUserId = String
+  implicit case class SlackUserId(userId: String) {
+    // test of whether an ID mentioned is a valid player
+    // slack user IDs are prefixed with "UD"
+    def isValid: Boolean = userId.contains("UD")
+  }
 }

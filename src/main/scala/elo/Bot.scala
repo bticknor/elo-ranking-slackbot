@@ -1,6 +1,5 @@
 package elo
 
-import com.redis.serialization.Parse.Implicits.parseDouble
 import slack.SlackUtil
 import slack.models.Message
 
@@ -24,16 +23,6 @@ object PingPongBot extends App {
 
   "leaderboard" - print the top 3 users in terms of Elo performance rating
   """
-
-  // Fetches a user's Elo performance score
-  def getUserScore(user: String): Double = {
-    val res = redisClient.get(user)
-    // If a user doesn't have a score in the DB, assign them the default
-    res match {
-      case Some(score) => score.toDouble
-      case None => EloRankingSystem.initialScore
-    }
-  }
 
   // Build challenge message
   def challengeMessage(challenger: Player, challengee: Player): String = {
@@ -94,7 +83,8 @@ object PingPongBot extends App {
 
       // print leaderboard if prompted
       if(message.text.contains("eaderboard")) {
-        val leaderboard = fetchLeaderboard
+        val topPlayers = LeaderboardService.leaderboardService.getLeaderboard()
+        val leaderboard = LeaderboardService.leaderboardService.formatLeaderboard(topPlayers)
         slackClient.sendMessage(message.channel, leaderboard)
       }
 
