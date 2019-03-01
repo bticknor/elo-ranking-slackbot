@@ -33,7 +33,7 @@ package object elo {
   // =========================================
   // Type ALL the things!
 
-  implicit case class SlackUserId(userId: String) {
+  implicit class SlackUserId(userId: String) {
     // test of whether an ID mentioned is a valid player
     // slack user IDs are prefixed with "UD"
     def isValid: Boolean = userId.contains("UD")
