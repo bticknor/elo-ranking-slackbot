@@ -116,7 +116,7 @@ object PingPongBot extends App {
           challenger <- challengerOpt
           challengee <- challengeeOpt
         } yield {
-          reportLoss(challenger, challengee)
+          if(challenger == challengee) "You play yourself, dummy!" else reportLoss(challenger, challengee)
         }).getOrElse("Mention a user to report a loss to them!")
         slackClient.sendMessage(message.channel, reportMessage)
       }
