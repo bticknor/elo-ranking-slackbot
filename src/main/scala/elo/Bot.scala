@@ -45,30 +45,33 @@ object PingPongBot extends App {
 
   def reportLoss(loser: Player, winner: Player): String = {
     // compute rating update
-    val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
-      loser.score, winner.score, 0
-    )
-    // update both players' ratings
-    val loserUpdatedRating = formatScore(loser.score + loserRatingUpdate)
-    // zero sum update, a property of Elo
-    val winnerUpdatedRating = formatScore(winner.score - loserRatingUpdate)
-    // write new ratings to DB
-    val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating)
-    val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating)
+    if(loser == winner) {
+      "You cannot play yourself, dummy!"
+    } else {
+      val loserRatingUpdate = EloRankingSystem.ratingUpdateA(
+        loser.score, winner.score, 0
+      )
+      // update both players' ratings
+      val loserUpdatedRating = formatScore(loser.score + loserRatingUpdate)
+      // zero sum update, a property of Elo
+      val winnerUpdatedRating = formatScore(winner.score - loserRatingUpdate)
+      // write new ratings to DB
+      val reporterScoreWritten = redisClient.set(loser.slackUserId, loserUpdatedRating)
+      val opponentScoreWritten = redisClient.set(winner.slackUserId, winnerUpdatedRating)
 
-    val successMessage = s"""
-    <@${loser.slackUserId}> has reported a loss to <@${winner.slackUserId}>.  Get 'em next time!
+      val successMessage = s"""
+      <@${loser.slackUserId}> has reported a loss to <@${winner.slackUserId}>.  Get 'em next time!
 
-    <@${loser.slackUserId}>'s Elo rating changed from ${formatScore(loser.score)} to ${loserUpdatedRating}.
-    <@${winner.slackUserId}>'s Elo rating changed from ${formatScore(winner.score)} to ${winnerUpdatedRating}.
-    """
-    // check that scores are written successfully
-    Seq(reporterScoreWritten, opponentScoreWritten) match {
-      case Seq(true, true) => successMessage
-      case _ => "Uh oh - issue updating user ratings in the DB!"
+      <@${loser.slackUserId}>'s Elo rating changed from ${formatScore(loser.score)} to ${loserUpdatedRating}.
+      <@${winner.slackUserId}>'s Elo rating changed from ${formatScore(winner.score)} to ${winnerUpdatedRating}.
+      """
+      // check that scores are written successfully
+      Seq(reporterScoreWritten, opponentScoreWritten) match {
+        case Seq(true, true) => successMessage
+        case _ => "Uh oh - issue updating user ratings in the DB!"
+      }
     }
   }
-
   // Main entry point for message logic
   // TODO clean this up
   def onMessageAction(message: Message): Unit = {
@@ -116,7 +119,7 @@ object PingPongBot extends App {
           challenger <- challengerOpt
           challengee <- challengeeOpt
         } yield {
-          if(challenger == challengee) "You play yourself, dummy!" else reportLoss(challenger, challengee)
+          reportLoss(challenger, challengee)
         }).getOrElse("Mention a user to report a loss to them!")
         slackClient.sendMessage(message.channel, reportMessage)
       }
