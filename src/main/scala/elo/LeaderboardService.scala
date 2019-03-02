@@ -3,7 +3,9 @@ import scala.util.Try
 
 class LeaderboardService(playerService: PlayerService) {
 
-  def parseSizeOfLeaderboard(messageText: String): Option[Int] = {
+  val defaultLeaderboardSize = 3
+
+  def getLeaderboardSize(messageText: String): Option[Int] = {
     // get position of token after first "leaderboard" invocation
     val splitCommand = messageText.split(" ")
     val posNumPlayers = splitCommand
@@ -17,8 +19,10 @@ class LeaderboardService(playerService: PlayerService) {
     }
   }
 
-  def getLeaderboard(numTopPlayers: Int = 3): Seq[Player] = {
-    playerService.findAllPlayers.sortBy(-_.score).take(numTopPlayers)
+  def getLeaderboard(numTopPlayers: Option[Int]): Seq[Player] = {
+    playerService.findAllPlayers
+      .sortBy(-_.score)
+      .take(numTopPlayers.getOrElse(defaultLeaderboardSize))
   }
 
   def formatLeaderboard(topPlayers: Seq[Player]): String = {
