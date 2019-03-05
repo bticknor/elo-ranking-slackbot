@@ -6,7 +6,7 @@ class LeaderboardService(playerService: PlayerService) {
   val DefaultLeaderboardSize = 3
 
   // TODO move this into a dedicated message parsing class/module
-  def getLeaderboardSize(messageText: String): Option[Int] = {
+  def getLeaderboardSize(messageText: String): Int = {
     // get position of token after first "leaderboard" invocation
     val splitCommand = messageText.split(" ")
     val posNumPlayers = splitCommand
@@ -14,16 +14,18 @@ class LeaderboardService(playerService: PlayerService) {
       .indexOf(true) + 1
     // "leaderboard" is last token in message, return None
     // if the token after "leaderboard" cannot be cast to int, return None
-    if(posNumPlayers == splitCommand.length) None else{
+    if(posNumPlayers == splitCommand.length) {
+      DefaultLeaderboardSize
+    } else{
       val numPlayersShow = splitCommand(posNumPlayers)
-      Try(numPlayersShow.toInt).toOption
+      Try(numPlayersShow.toInt).getOrElse(DefaultLeaderboardSize)
     }
   }
 
-  def getLeaderboard(numTopPlayers: Option[Int]): Seq[Player] = {
+  def getLeaderboard(numTopPlayers: Int): Seq[Player] = {
     playerService.findAllPlayers
       .sortBy(-_.score)
-      .take(numTopPlayers.getOrElse(DefaultLeaderboardSize))
+      .take(numTopPlayers)
   }
 
   def formatLeaderboard(topPlayers: Seq[Player]): String = {
