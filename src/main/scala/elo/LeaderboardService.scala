@@ -12,14 +12,15 @@ class LeaderboardService(playerService: PlayerService) {
     val posNumPlayers = splitCommand
       .map(x => x.contains("eaderboard"))
       .indexOf(true) + 1
-    // "leaderboard" is last token in message, return None
-    // if the token after "leaderboard" cannot be cast to int, return None
-    if(posNumPlayers == splitCommand.length) {
-      DefaultLeaderboardSize
-    } else{
-      val numPlayersShow = splitCommand(posNumPlayers)
-      Try(numPlayersShow.toInt).getOrElse(DefaultLeaderboardSize)
-    }
+    // get the token after the "leaderboard" token in the message
+    // try to convert that to int, if we can't return the default
+    // if "leaderboard" is the last token in the message return the default
+    (for {
+      numPlayersStr <- splitCommand.lift(posNumPlayers) if posNumPlayers == splitCommand.length
+      numPlayers <- Try(numPlayersStr.toInt).toOption
+    } yield {
+      numPlayers
+    }).getOrElse(DefaultLeaderboardSize)
   }
 
   def getLeaderboard(numTopPlayers: Int): Seq[Player] = {
