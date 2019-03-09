@@ -38,11 +38,6 @@ object PingPongBot extends App {
     """
   }
 
-  def fetchLeaderboard(): String = {
-    val topPlayers = LeaderboardService.leaderboardService.getLeaderboard()
-    LeaderboardService.leaderboardService.formatLeaderboard(topPlayers)
-  }
-
   def reportLoss(loser: Player, winner: Player): String = {
     // compute rating update
     if(loser == winner) {
@@ -86,7 +81,13 @@ object PingPongBot extends App {
 
       // print leaderboard if prompted
       if(message.text.contains("eaderboard")) {
-        val topPlayers = LeaderboardService.leaderboardService.getLeaderboard()
+        // get size of leaderboard
+        val leaderboardSize = LeaderboardService.leaderboardService.getLeaderboardSize(
+          message.text
+        )
+        val topPlayers = LeaderboardService.leaderboardService.getLeaderboard(
+          leaderboardSize
+        )
         val leaderboard = LeaderboardService.leaderboardService.formatLeaderboard(topPlayers)
         slackClient.sendMessage(message.channel, leaderboard)
       }
