@@ -16,7 +16,7 @@ class LeaderboardService(playerService: PlayerService) {
     // try to convert that to int, if we can't return the default
     // if "leaderboard" is the last token in the message return the default
     (for {
-      numPlayersStr <- splitCommand.lift(posNumPlayers) if posNumPlayers == splitCommand.length
+      numPlayersStr <- splitCommand.lift(posNumPlayers) if posNumPlayers != splitCommand.length
       numPlayers <- Try(numPlayersStr.toInt).toOption
     } yield {
       numPlayers
