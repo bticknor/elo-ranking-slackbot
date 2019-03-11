@@ -25,7 +25,8 @@ Commands I support:
 
 "congrats" - report a loss / congratulate the winner...you must @ the person you lost to in the message
 
-"leaderboard" - print the top 5 users in terms of Elo performance rating
+"leaderboard [n]" - print the top n users in terms of Elo performance rating, with
+  3 being the default
 ```
 
 ## Installation / Deployment
