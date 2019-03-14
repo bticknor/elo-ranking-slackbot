@@ -18,3 +18,5 @@ libraryDependencies ++= Seq (
   // and my other dependencies
 )
 
+lazy val root = (project in file(".")).enablePlugins(AssemblyPlugin)
+
