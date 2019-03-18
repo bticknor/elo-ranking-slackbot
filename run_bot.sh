@@ -14,6 +14,13 @@ randy="randy-1.2.jar"
 
 # ==========================================
 
+# log whether we can see a file tracking bids
+if [ -f dump.rdb ]; then
+  echo "Reading existing Elo data from dump.rdb..."
+else
+  echo "No existing Elo data found, starting from an empty Elo db..."
+fi
+
 # start redis server at specified port, disown
 redis-server --port $redis_port &
 disown
