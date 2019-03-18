@@ -12,8 +12,11 @@ slack_token_file="tf_slack_bot_token.txt"
 # jar file of randy
 randy="randy-1.2.jar"
 
-
 # ==========================================
+
+# start redis server at specified port, disown
+redis-server --port $redis_port &
+disown
 
 # ping redis server at port
 redis_pong=$(redis-cli -p $redis_port ping)

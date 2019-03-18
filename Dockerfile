@@ -38,6 +38,6 @@ COPY / /randy/
 # build the "fat jar" file via the sbt assembly command
 RUN cd randy && sbt assembly 
 
-# random shit as a test
-CMD ["cat", "test.txt"]
-
+# run bot script
+#CMD /randy/run_bot.sh
+CMD ["echo", "hi mom!"]
