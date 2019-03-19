@@ -39,5 +39,5 @@ COPY / /randy/
 RUN cd randy && sbt assembly 
 
 # run bot script
-#CMD /randy/run_bot.sh
-CMD ["echo", "hi mom!"]
+CMD /randy/run_bot.sh
+

@@ -10,7 +10,8 @@ redis_port="6380"
 slack_token_file="tf_slack_bot_token.txt"
 
 # jar file of randy
-randy="randy-1.2.jar"
+## TODO parametrize version of randy 
+randy="target/scala-2.11/elo-bot-assembly-1.2.jar"
 
 # ==========================================
 
@@ -21,8 +22,13 @@ else
   echo "No existing Elo data found, starting from an empty Elo db..."
 fi
 
+# build redis config file
+# save every 5 mins if there is at least 1 change to the dataset
+echo save 300 10 >> redis.conf
+echo port $redis_port >> redis.conf
+
 # start redis server at specified port, disown
-redis-server --port $redis_port &
+redis-server redis.conf &
 disown
 
 # ping redis server at port
