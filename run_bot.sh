@@ -24,7 +24,7 @@ fi
 
 # build redis config file
 # save every 5 mins if there is at least 1 change to the dataset
-echo save 300 10 >> redis.conf
+echo save 300 1 > redis.conf
 echo port $redis_port >> redis.conf
 
 # start redis server at specified port, disown
