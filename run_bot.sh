@@ -29,7 +29,6 @@ echo port $redis_port >> redis.conf
 
 # start redis server at specified port, disown
 redis-server redis.conf &
-disown
 
 # ping redis server at port
 redis_pong=$(redis-cli -p $redis_port ping)
@@ -52,6 +51,4 @@ export SLACK_TOKEN=$(cat tf_slack_bot_token.txt)
 
 # run the slack bot in the background
 java -jar $randy &
-# disown the job
-disown
 
