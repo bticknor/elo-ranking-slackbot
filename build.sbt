@@ -2,7 +2,7 @@ name := "elo-bot"
 
 scalaVersion := "2.11.6"
 
-version := "1.2"
+version := "1.2.1"
 
 libraryDependencies += "com.github.slack-scala-client" %% "slack-scala-client" % "0.2.5"
 
