@@ -35,7 +35,7 @@ class LeaderboardService(playerService: PlayerService) {
     } else {
       topPlayers
         .zip(1 to topPlayers.size)
-        .map { case (player, rank) => s"$rank. <@${player.slackUserId}> ${player.formattedScore}" }
+        .map { case (player, rank) => s"$rank. <${player.slackUserId}> ${player.formattedScore}" }
         .foldLeft(s"True Fit top ${topPlayers.size} ping pong player(s)\n")((concatMsg, playerLine) => concatMsg + "\n" + playerLine)
     }
   }
